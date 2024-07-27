@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-apt update && apt install -y openssl caddy
+apt update && apt install -y openssl
