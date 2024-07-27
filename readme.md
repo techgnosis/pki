@@ -125,6 +125,7 @@ openssl x509 -req \
 -out endpoint_cert.pem \
 -days 365
 
+
 openssl verify -CAfile rootCA.pem endpoint_cert.pem
 
 
