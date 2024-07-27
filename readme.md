@@ -1,3 +1,21 @@
+Tested with `OpenSSL 3.0.13 30 Jan 2024 (Library: OpenSSL 3.0.13 30 Jan 2024)` on Linux
+
+Core Concepts and Terms
+-----------------------
+Symmetric encryption - a shared key is used by both parties. Faster, but difficult to share the key in a secure manner
+
+Asymmetric encryption - private key and public key. Encrypt data with the public key and only the private key can decrypt
+
+Hash function - takes an input and produces a fixed size output. The same input will always produce the same output
+
+Digest or Hash - the output of a hash function
+
+Signature - a private key can encrypt a digest and that's called a signature. Only a private key can create a signature
+
+Certificate - a file that contains information about the owner of the certificate, the public key of the owner of the certificate, and a signature from a Certificate Authority
+
+Certificate Authority (CA) - a business or service that has the means to verify that someone who says they own a domain actually owns the domain
+
 digital signature
 ------------------
 a message
@@ -125,8 +143,12 @@ openssl x509 -req \
 -out endpoint_cert.pem \
 -days 365
 
-
+# verify the cert is from the root cert
 openssl verify -CAfile rootCA.pem endpoint_cert.pem
+
+# view a cert
+openssl x509 -in endpoint_cert.pem -text -noout
+
 
 
 

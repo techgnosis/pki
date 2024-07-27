@@ -13,3 +13,4 @@ rootCA.pem
 endpoint.csr
 endpoint_private_key.pem
 endpoint_cert.pem
+rootCA.srl
