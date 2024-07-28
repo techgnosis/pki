@@ -1,4 +1,0 @@
-hello.lab.home {
-	respond "Dogs and clowns"
-	tls /root/
-}

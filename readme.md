@@ -149,6 +149,12 @@ openssl verify -CAfile rootCA.pem endpoint_cert.pem
 # view a cert
 openssl x509 -in endpoint_cert.pem -text -noout
 
+# download a cert from an endpoint
+openssl s_client \
+-servername localhost \
+-connect localhost:8081
+
+
 
 
 

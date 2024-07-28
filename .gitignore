@@ -16,3 +16,6 @@ endpoint_cert.pem
 rootCA.srl
 .wget-hsts
 .step
+.config
+.local
+traefik
