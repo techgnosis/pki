@@ -2,7 +2,7 @@ Tested with `OpenSSL 3.0.13 30 Jan 2024 (Library: OpenSSL 3.0.13 30 Jan 2024)` o
 
 Core Concepts and Terms
 -----------------------
-Symmetric encryption - a shared key is used by both parties. Faster, but difficult to share the key in a secure manner
+Symmetric encryption - a shared key is used by both parties. Less CPU-intensive, but difficult to share the key in a secure manner
 
 Asymmetric encryption - private key and public key. Encrypt data with the public key and only the private key can decrypt
 
@@ -12,9 +12,9 @@ Digest or Hash - the output of a hash function
 
 Signature - a private key can encrypt a digest and that's called a signature. Only a private key can create a signature
 
-Certificate - a file that contains information about the owner of the certificate, the public key of the owner of the certificate, and a signature from a Certificate Authority
+Certificate - a file that contains information about the owner of the certificate, the public key of the owner of the certificate, and a signature from a Certificate Authority that created the certificate
 
-Certificate Authority (CA) - a business or service that has the means to verify that someone who says they own a domain actually owns the domain
+Certificate Authority (CA) - a business or service that has the means to verify that someone who says they own a domain actually owns the domain and provides a certificate to the domain owner so other can verify
 
 digital signature
 ------------------
@@ -119,10 +119,10 @@ openssl req \
 # make the root certificate
 # x.509 is the standard for certificates
 openssl x509 -req \
--days 365 \
 -in rootCA.csr \
 -signkey root_private_key.pem \
--out rootCA.pem
+-out rootCA.pem \
+-days 365 \
 
 # make the private key for endpoint cert
 openssl genrsa \
@@ -134,6 +134,10 @@ openssl req \
 -key endpoint_private_key.pem \
 -out endpoint.csr
 
+# the endpoint private key is not part of the cert, but it is provided to generate 
+# a public key that is part of the cert. that public key is used by clients to encrypt a symmetric key
+# to initiate TLS
+
 
 # make the endpoint cert from the root cert
 openssl x509 -req \
@@ -142,6 +146,9 @@ openssl x509 -req \
 -CAkey root_private_key.pem \
 -out endpoint_cert.pem \
 -days 365
+
+# the difference between the root cert and the endpoint cert is -CA to provide the root cert. This cert will appear in the chain
+# and will work to verify the endpoint cert
 
 # verify the cert is from the root cert
 openssl verify -CAfile rootCA.pem endpoint_cert.pem

@@ -19,3 +19,4 @@ rootCA.srl
 .config
 .local
 traefik
+.cache
