@@ -31,12 +31,12 @@ openssl rsa \
 -pubout \
 -out public_key_rsa.pem
 
-###### hash some data (digest)
+###### print a hash/digest to STDOUT so you can see what it looks like
 openssl dgst \
 -sha256 \
 message
 
-###### make the digest and sign it
+###### encrypt (sign) the digest into a binary file
 openssl dgst \
 -sha256 \
 -sign private_key_rsa.pem \
@@ -51,7 +51,7 @@ openssl dgst \
 message
 
 ### DIY TLS
-TLS uses a "hybrid" scheme. The client creates a symmetric encryption key, then encrypts that key with the public key and sends it to the server which decrypts it with the private key. then all of the session data is encrypted with the symmetric key.
+TLS uses a "hybrid" scheme. The client creates a symmetric encryption key, then encrypts that key with the public key and sends it to the server which decrypts it with the private key. Then all of the session data is encrypted/decrypted with the symmetric key since it's more computationally efficient.
 
 ###### create a symmetric encryption key
 openssl rand -base64 32 > symmetric_key
@@ -63,8 +63,6 @@ openssl pkeyutl \
 -inkey public_key_rsa.pem \
 -in symmetric_key \
 -out symmetric_key.bin
-
-###### send the encrypted symmetric key to the server
 
 ###### decrypt the encrypted symmetric key with the private key
 openssl pkeyutl \
@@ -79,9 +77,6 @@ openssl enc \
 -out http_request.bin \
 -pbkdf2 \
 -pass file:symmetric_key
-
-
-
 
 
 
@@ -106,39 +101,39 @@ openssl x509 -req \
 -out rootCA.pem \
 -days 365 \
 
-Note - x.509 is the standard for certificates
+*Note - x.509 is the standard for certificates*
 
 
-###### make the private key for endpoint cert
+###### make the private key for domain cert
 openssl genrsa \
--out endpoint_private_key.pem 2048
+-out domain_private_key.pem 2048
 
-###### make the CSR for the endpoint cert
+###### make the CSR for the domain cert
 openssl req \
 -new \
--key endpoint_private_key.pem \
--out endpoint.csr
+-key domain_private_key.pem \
+-out domain.csr
 
-Note - the endpoint private key is not part of the cert, but it is provided to generate a public key that is part of the cert. that public key is used by clients to encrypt a symmetric key to initiate TLS
+*Note - the domain private key is not part of the cert, but it is provided to generate a public key that is part of the cert. that public key is used by clients to encrypt a symmetric key to initiate TLS*
 
 
-###### make the endpoint cert from the root cert
+###### make the domain cert from the root cert
 openssl x509 -req \
--in endpoint.csr \
+-in domain.csr \
 -CA rootCA.pem \
 -CAkey root_private_key.pem \
--out endpoint_cert.pem \
+-out domain_cert.pem \
 -days 365
 
-Note - the difference between the root cert and the endpoint cert is -CA to provide the root cert. This cert will appear in the chain and will work to verify the endpoint cert
+*Note - the difference between the root cert creation and the domain cert creation is -CA to provide the root cert. This cert will appear in the chain and will work to verify the domain cert*
 
 ###### verify the cert is from the root cert
-openssl verify -CAfile rootCA.pem endpoint_cert.pem
+openssl verify -CAfile rootCA.pem domain_cert.pem
 
 ###### view a cert
-openssl x509 -in endpoint_cert.pem -text -noout
+openssl x509 -in domain_cert.pem -text -noout
 
-###### download a cert from an endpoint
+###### view a cert from a domain
 openssl s_client \
 -servername localhost \
 -connect localhost:8081
