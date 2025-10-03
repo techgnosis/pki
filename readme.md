@@ -22,32 +22,32 @@ Certificate Authority (CA) - a business or service that has the means to verify 
 To digitally sign a message, make a hash of the message using a hashing function (like SHA-256). Then encrypt the hash with a private key. Send the message and the hash to someone with the public key. They decrypt the encrypted hash and they hash the original message. If the decrypted hash and the new hash match, the message has not been tampered with and they can be sure that it comes from the private key holder
 
 ###### make the private key
-openssl genrsa \\
+openssl genrsa \
 -out private_key_rsa.pem 2048
 
 ###### make a public key from the private key
-openssl rsa \\
--in private_key_rsa.pem \\
--pubout \\
+openssl rsa \
+-in private_key_rsa.pem \
+-pubout \
 -out public_key_rsa.pem
 
 ###### print a hash/digest to STDOUT so you can see what it looks like
-openssl dgst \\
--sha256 \\
+openssl dgst \
+-sha256 \
 message
 
 ###### encrypt (sign) the digest into a binary file
-openssl dgst \\
--sha256 \\
--sign private_key_rsa.pem \\
--out message.bin \\
+openssl dgst \
+-sha256 \
+-sign private_key_rsa.pem \
+-out message.bin \
 message
 
 ###### verify the signature
-openssl dgst \\
--sha256 \\
--verify public_key_rsa.pem \\
--signature message.bin \\
+openssl dgst \
+-sha256 \
+-verify public_key_rsa.pem \
+-signature message.bin \
 message
 
 ### DIY TLS
@@ -57,25 +57,25 @@ TLS uses a "hybrid" scheme. The client creates a symmetric encryption key, then 
 openssl rand -base64 32 > symmetric_key
 
 ###### encrypt the symmetric encryption key with the public key
-openssl pkeyutl \\
--encrypt \\
--pubin \\
--inkey public_key_rsa.pem \\
--in symmetric_key \\
+openssl pkeyutl \
+-encrypt \
+-pubin \
+-inkey public_key_rsa.pem \
+-in symmetric_key \
 -out symmetric_key.bin
 
 ###### decrypt the encrypted symmetric key with the private key
-openssl pkeyutl \\
--decrypt \\
--inkey private_key_rsa.pem \\
+openssl pkeyutl \
+-decrypt \
+-inkey private_key_rsa.pem \
 -in symmetric_key.bin
 
 ###### client uses the symmetric key to encrypt the session data
-openssl enc \\
--aes-256-cbc \\
--in http_request \\
--out http_request.bin \\
--pbkdf2 \\
+openssl enc \
+-aes-256-cbc \
+-in http_request \
+-out http_request.bin \
+-pbkdf2 \
 -pass file:symmetric_key
 
 
@@ -84,45 +84,45 @@ openssl enc \\
 ### DIY certificate authority
 
 ###### make private key for root certificate
-openssl genrsa \\
+openssl genrsa \
 -out root_private_key.pem 2048
 
 
 ###### make CSR for root certificate
-openssl req \\
--new \\
--key root_private_key.pem \\
+openssl req \
+-new \
+-key root_private_key.pem \
 -out rootCA.csr
 
 ###### make the root certificate
-openssl x509 -req \\
--in rootCA.csr \\
--signkey root_private_key.pem \\
--out rootCA.pem \\
--days 365
+openssl x509 -req \
+-in rootCA.csr \
+-signkey root_private_key.pem \
+-out rootCA.pem \
+-days 365 \
 
 *Note - x.509 is the standard for certificates*
 
 
 ###### make the private key for domain cert
-openssl genrsa \\
+openssl genrsa \
 -out domain_private_key.pem 2048
 
 ###### make the CSR for the domain cert
-openssl req \\
--new \\
--key domain_private_key.pem \\
+openssl req \
+-new \
+-key domain_private_key.pem \
 -out domain.csr
 
 *Note - the domain private key is not part of the cert, but it is provided to generate a public key that is part of the cert. that public key is used by clients to encrypt a symmetric key to initiate TLS*
 
 
 ###### make the domain cert from the root cert
-openssl x509 -req \\
--in domain.csr \\
--CA rootCA.pem \\
--CAkey root_private_key.pem \\
--out domain_cert.pem \\
+openssl x509 -req \
+-in domain.csr \
+-CA rootCA.pem \
+-CAkey root_private_key.pem \
+-out domain_cert.pem \
 -days 365
 
 *Note - the difference between the root cert creation and the domain cert creation is -CA to provide the root cert. This cert will appear in the chain and will work to verify the domain cert*
@@ -134,6 +134,12 @@ openssl verify -CAfile rootCA.pem domain_cert.pem
 openssl x509 -in domain_cert.pem -text -noout
 
 ###### view a cert from a domain
-openssl s_client \\
--servername localhost \\
+openssl s_client \
+-servername localhost \
 -connect localhost:8081
+
+
+
+
+
+
